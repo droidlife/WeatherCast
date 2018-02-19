@@ -1,6 +1,11 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name">WeatherCast</string>
+    <string name="action_map">Map Location</string>
+    <string name="action_share">Share</string>
+
+    <!--Used in overflow menu to refresh weather data-->
     <string name="action_refresh">Refresh</string>
+
     <string name="error_message">
         An error has occurred. Please try again by clicking REFRESH
     </string>

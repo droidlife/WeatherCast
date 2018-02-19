@@ -10,13 +10,32 @@ import android.widget.TextView;
 public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.ForecastAdapterViewHolder> {
     private String[] mWeatherData;
 
-    public class ForecastAdapterViewHolder extends RecyclerView.ViewHolder {
+    private final ForecastAdapterOnClickHandler mClickHandler;
+
+    public interface ForecastAdapterOnClickHandler {
+        void onClick(String weatherForDay);
+    }
+
+    public ForecastAdapter(ForecastAdapterOnClickHandler clickHandler) {
+        mClickHandler = clickHandler;
+    }
+
+    public class ForecastAdapterViewHolder extends RecyclerView.ViewHolder
+            implements View.OnClickListener {
 
         public final TextView mWeatherTextView;
 
         public ForecastAdapterViewHolder(View itemView) {
             super(itemView);
             mWeatherTextView = itemView.findViewById(R.id.tv_weather_data);
+            itemView.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View view) {
+            int adapterPosition = getAdapterPosition();
+            String weatherForDay = mWeatherData[adapterPosition];
+            mClickHandler.onClick(weatherForDay);
         }
     }
 

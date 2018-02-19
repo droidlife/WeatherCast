@@ -1,5 +1,7 @@
 package main.weathercast;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -12,6 +14,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.net.URL;
 
@@ -19,11 +22,12 @@ import main.weathercast.data.WeatherPreference;
 import main.weathercast.utilities.NetworkUtility;
 import main.weathercast.utilities.OpenWeatherJsonUtil;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements ForecastAdapter.ForecastAdapterOnClickHandler {
     private RecyclerView mRecyclerView;
     private ForecastAdapter mForecastAdapter;
     private TextView mErrorMessageDisplay;
     private ProgressBar mLoadingIndicator;
+    private Toast mToast;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
                 new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         mRecyclerView.setLayoutManager(linearLayoutManager);
         mRecyclerView.setHasFixedSize(true);
-        mForecastAdapter = new ForecastAdapter();
+        mForecastAdapter = new ForecastAdapter(this);
         mRecyclerView.setAdapter(mForecastAdapter);
         loadWeatherData();
     }
@@ -78,6 +82,15 @@ public class MainActivity extends AppCompatActivity {
         String location = WeatherPreference.getPreferredWeatherLocation(this);
         Log.v("loadWeatherData", "Location : " + location);
         new FetchWeatherTask().execute(location);
+    }
+
+    @Override
+    public void onClick(String weatherForDay) {
+        Context context = this;
+        Class destinationClass = DetailActivity.class;
+        Intent intent = new Intent(context, destinationClass);
+        intent.putExtra(Intent.EXTRA_TEXT, weatherForDay);
+        startActivity(intent);
     }
 
     public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
