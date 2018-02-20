@@ -1,6 +1,9 @@
 package main.weathercast;
 
 import android.annotation.SuppressLint;
+import android.content.SharedPreferences;
+import android.net.Uri;
+import android.preference.PreferenceManager;
 import android.support.v4.content.AsyncTaskLoader;
 import android.content.Context;
 import android.content.Intent;
@@ -26,10 +29,12 @@ import main.weathercast.utilities.NetworkUtility;
 import main.weathercast.utilities.OpenWeatherJsonUtil;
 
 public class MainActivity extends AppCompatActivity implements
-        ForecastAdapter.ForecastAdapterOnClickHandler, LoaderManager.LoaderCallbacks<String[]> {
+        ForecastAdapter.ForecastAdapterOnClickHandler, LoaderManager.LoaderCallbacks<String[]>,
+        SharedPreferences.OnSharedPreferenceChangeListener {
+
     private final static String TAG = MainActivity.class.getSimpleName();
     private final static int FORECAST_LOADER_ID = 0;
-
+    private static boolean PREFERENCES_HAVE_BEEN_UPDATED = false;
     private RecyclerView mRecyclerView;
     private ForecastAdapter mForecastAdapter;
     private TextView mErrorMessageDisplay;
@@ -54,6 +59,27 @@ public class MainActivity extends AppCompatActivity implements
         Bundle bundleForLoader = null;
         getSupportLoaderManager().initLoader(FORECAST_LOADER_ID, bundleForLoader, this);
 
+        PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(this);
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (PREFERENCES_HAVE_BEEN_UPDATED) {
+            Log.d(TAG, "onStart: preferences were updated");
+            getSupportLoaderManager().restartLoader(FORECAST_LOADER_ID, null, this);
+            PREFERENCES_HAVE_BEEN_UPDATED = false;
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        /* Unregister MainActivity as an OnPreferenceChangedListener to avoid any memory leaks. */
+        PreferenceManager.getDefaultSharedPreferences(this)
+                .unregisterOnSharedPreferenceChangeListener(this);
     }
 
     private void showWeatherDataView() {
@@ -83,7 +109,31 @@ public class MainActivity extends AppCompatActivity implements
             getSupportLoaderManager().restartLoader(FORECAST_LOADER_ID, null, this);
             return true;
         }
+
+        if (id == R.id.action_map) {
+            openLocationInMap();
+            return true;
+        }
+
+        if (id == R.id.action_settings) {
+            Intent intent = new Intent(this, SettingsActivity.class);
+            startActivity(intent);
+        }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void openLocationInMap() {
+        String addressString = WeatherPreference.getPreferredWeatherLocation(this);
+        Uri geoLocation = Uri.parse("geo:0,0?q=" + addressString);
+
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setData(geoLocation);
+
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivity(intent);
+        } else {
+            Log.d(TAG, "Couldn't call " + geoLocation.toString() + ", no receiving apps installed!");
+        }
     }
 
     @Override
@@ -157,5 +207,10 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onLoaderReset(Loader<String[]> loader) {
 
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
+        PREFERENCES_HAVE_BEEN_UPDATED = true;
     }
 }

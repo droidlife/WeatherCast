@@ -1,6 +1,10 @@
 package main.weathercast.data;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
+
+import main.weathercast.R;
 
 public class WeatherPreference {
 
@@ -42,13 +46,27 @@ public class WeatherPreference {
 
 
     public static String getPreferredWeatherLocation(Context context) {
-        /** This will be implemented in a future lesson **/
-        return getDefaultWeatherLocation();
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        String keyForLocation = context.getString(R.string.pref_location_key);
+        String defaultLocation = context.getString(R.string.pref_location_default);
+
+        return preferences.getString(keyForLocation, defaultLocation);
     }
 
     public static boolean isMetric(Context context) {
-        /** This will be implemented in a future lesson **/
-        return true;
+        SharedPreferences prefs = PreferenceManager
+                .getDefaultSharedPreferences(context);
+        String keyForUnits = context.getString(R.string.pref_units_key);
+        String defaultUnits = context.getString(R.string.pref_units_metric);
+        String preferredUnits = prefs.getString(keyForUnits, defaultUnits);
+        String metric = context.getString(R.string.pref_units_metric);
+        boolean userPrefersMetric;
+        if (metric.equals(preferredUnits)) {
+            userPrefersMetric = true;
+        } else {
+            userPrefersMetric = false;
+        }
+        return userPrefersMetric;
     }
 
 
@@ -62,7 +80,7 @@ public class WeatherPreference {
         return false;
     }
 
-        private static String getDefaultWeatherLocation() {
+    private static String getDefaultWeatherLocation() {
         /** This will be implemented in a future lesson **/
         return DEFAULT_WEATHER_LOCATION;
     }

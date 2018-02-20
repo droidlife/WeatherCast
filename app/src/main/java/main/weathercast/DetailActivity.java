@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.support.v4.app.ShareCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
@@ -27,6 +28,11 @@ public class DetailActivity extends AppCompatActivity {
                 mWeatherDisplay.setText(mForecast);
             }
         }
+
+        if (this.getSupportActionBar() != null) {
+            this.getSupportActionBar().setHomeButtonEnabled(true);
+            this.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
     }
 
     private Intent createShareForecastIntent() {
@@ -35,6 +41,18 @@ public class DetailActivity extends AppCompatActivity {
                 .setText(mForecast + "WeatherCast")
                 .getIntent();
         return shareIntent;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            onBackPressed();
+        } else if (item.getItemId() == R.id.action_settings) {
+            Intent intent = new Intent(this, SettingsActivity.class);
+            startActivity(intent);
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
